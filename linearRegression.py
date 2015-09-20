@@ -31,18 +31,34 @@ def getWeights(X, Y):
     
     #Transpose X and multiply X^tX
     Xt = X.T
-    Xt_X = Xt.dot(X)
+    Xt_X = np.dot(Xt,X)
     
     #Take (X^tX)^-1
     Xt_X_inverse = np.linalg.inv(Xt_X)
     
     #Multiply X^tY
-    Xt_Y = Xt.dot(Y)
+    Xt_Y = np.dot(Xt,Y)
     
     #Get weights
-    w = Xt_X.dot(Xt_Y)
+    w = np.dot(Xt_X_inverse,Xt_Y)
     
     return w
+    
+def getError(X, w):
+    #New columns of 1s
+    ones = np.ones((39644,), dtype = np.int)
+    
+    #Append columns to X
+    X = np.column_stack((X, ones))
+    
+    #Transpose X and multiply X^tX
+    Ypredict = np.dot(X,w)
+    Ytest = X
+    
+    Err = np.mean((Ypredict - Ytest)**2)
+    
+    print Err
+    
     
 def main():
     #Get the data from the CVS file into an array    
@@ -50,6 +66,7 @@ def main():
     y_Values = getYValues(data)
     x_Values = getXValues(data)
     weights = getWeights(x_Values,y_Values)
+    getError(x_Values, weights)
     
     #print x_Values.shape
     #print y_Values
