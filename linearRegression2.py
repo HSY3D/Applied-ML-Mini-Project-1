@@ -8,7 +8,7 @@ import numpy as np
 from numpy import genfromtxt
 
 data_size = 39644
-training_set_size = 20000
+training_set_size = 30000
 
 def main():
     raw_data = getData('OnlineNewsPopularity/OnlineNewsPopularity.csv')
@@ -27,34 +27,45 @@ def linearRegression(raw_data):
     YTrainingSet = Y[0:training_set_size, :]
     XTestSet = X[training_set_size:, :]
     YTestSet = Y[training_set_size:, :]
-    #Caclulate weights
-    weights = getWeights(XTrainingSet, YTrainingSet, training_set_size)    
-    #print weights    
-    #Calculate Error
-    print getError(XTestSet, YTestSet, weights, data_size-training_set_size)
-    #print YPredict
+    #Add 1s to XTest and XTraining
+    XTrainingSet = addOnes(XTrainingSet, training_set_size)
+    XTestSet = addOnes(XTestSet, data_size-training_set_size)
     
-
+    #Caclulate weights
+    weights = getWeights2(XTrainingSet, YTrainingSet, training_set_size)  
+    #Calculate Error
+    error = getError(XTestSet, YTestSet, weights, data_size-training_set_size)
+    print error    
     
 ############## HELPER FUNCTIONS ##############
-def getError(X, YTest, w, setSize):
-    #New columns of 1s
-    ones = np.ones((setSize,), dtype = np.int)
-    #Append columns to X
-    X = np.column_stack((X, ones))
+def addOnes(X, setSize):
+    #New column of 1s
+    ones = np.ones((setSize,), dtype=np.int)
+    #Append column to X
+    X = np.column_stack((X, ones)) 
+    return X
+    
+def getError(XTest, YTest, w, setSize):
     #Transpose X and multiply X^tX
-    Ypredict = np.dot(X,w)
+    Ypredict = np.dot(XTest,w)
     #Caclulate Error
     return np.mean((YTest - Ypredict)**2)
     
+def getWeights2(X, Y, setSize):
+    #Transpose X and multiply X^tX
+    Xt = np.transpose(X)
+    Xt_X = np.dot(Xt,X)
+    Xt_Y = np.dot(Xt,Y)
+    return np.linalg.lstsq(Xt_X, Xt_Y)[0]
     
 def getWeights(X, Y, setSize):
     #New column of 1s
     ones = np.ones((setSize,), dtype=np.int)
     #Append column to X
-    X = np.column_stack((X, ones))   
+    X = np.column_stack((X, ones)) 
+    #X = np.concatenate((X,ones), axis = 1)
     #Transpose X and multiply X^tX
-    Xt = X.T
+    Xt = np.transpose(X)
     Xt_X = np.dot(Xt,X)
     #Take (X^tX)^-1
     Xt_X_inverse = np.linalg.inv(Xt_X)
