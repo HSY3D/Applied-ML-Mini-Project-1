@@ -13,6 +13,7 @@ training_set_size = 30000
 def main():
     raw_data = getData('OnlineNewsPopularity/OnlineNewsPopularity.csv')
     linearRegression(raw_data)
+    gradientDescent(raw_data)
   
 def linearRegression(raw_data):
     global training_set_size
@@ -36,8 +37,36 @@ def linearRegression(raw_data):
     #Calculate Error
     error = getError(XTestSet, YTestSet, weights, data_size-training_set_size)
     print error    
+
+def gradientDescent(raw_data):
+    global data_size
+    global training_set_size
+    #Remove the first row and first two columns    
+    raw_data = raw_data[1:,]
+    raw_data = np.delete(raw_data, np.s_[0:2], 1)
+    #Get the X values and Y Values
+    X = getXValues(raw_data)
+    Y = getYValues(raw_data)
+    #Training Set & TestSet
+    XTrainingSet = X[0:training_set_size, :]
+    YTrainingSet = Y[0:training_set_size, :]
+    XTestSet = X[training_set_size:, :]
+    YTestSet = Y[training_set_size:, :]
+    a = 0.05
+    w_k = np.ones((58,), dtype=np.int)
+    w_k1 = w_k - a*gradientStep(XTrainingSet,YTrainingSet,w_k)    
+    while (getError(XTrainingSet, YTrainingSet, abs(w_k1-w_k), training_set_size) < 252034158.7):
+        w_k = w_k1        
+        w_k1 = w_k - a*gradientStep(XTrainingSet,YTrainingSet,w_k) 
+    print w_k1
     
 ############## HELPER FUNCTIONS ##############
+def gradientStep(X,Y,w):
+    XtX_w = np.dot(np.dot(X.T, X), w)
+    Xt_Y = np.dot(X.T,Y)
+    return 2*(XtX_w-Xt_Y)
+    
+    
 def addOnes(X, setSize):
     #New column of 1s
     ones = np.ones((setSize,), dtype=np.int)
