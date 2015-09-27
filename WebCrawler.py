@@ -8,7 +8,9 @@ Created on Tue Sep 22 19:35:38 2015
 #from urllib import urlopen
 from bs4 import BeautifulSoup
 import requests
-
+from lxml import html
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys 
 #page = 1
 
 visitedLinks = []
@@ -44,7 +46,6 @@ def traverseInternet(url):
         return
     elif (url not in visitedLinks):
         visitedLinks.append(url)
-        getFeatures(url)
         print visitedLinks
         print "---------"
         for links in newLinks:
@@ -55,11 +56,11 @@ def getFeatures(url):
     markup = source_code.text
     soup = BeautifulSoup(markup, "lxml")
     print soup
-    author = soup.findAll("a", { "rel" : "author" })[0].string
-    print author
-    section = soup.findAll("span", {"role":"presentation"},{"itemprop":"articleSection"})[0].string
-    section = section.strip()
-    print section
+    #author = soup.findAll("a", { "rel" : "author" })[0].string
+    #print author
+    #fb = soup.findAll("li",{"class":"facebook"})
+    slidernumber = soup.findAll("h5", {"class":"total-shares-count"})
+    print slidernumber[1]
     
     
 def getLinks(url):
@@ -76,9 +77,23 @@ def getLinks(url):
             links.append(formattedURL)
     return links
     
-def main():
-    #traverseInternet('http://www.aljazeera.com/news/default.html')
-    #mtl_blog2("http://www.wired.com/") 
-    getFeatures("http://www.wired.com/2015/09/new-iphone-cases-for-iphone6s/")
+def urlliby(url):
+    page = requests.get(url)
+    tree = html.fromstring(page.text)
+    fbshares = tree.xpath('//*[@id="social-share"]/li[1]/h5')
+    print 'Buyers: ', fbshares
     
+def sele():
+    b = connect('htmlunit')                                                                                                                                      
+    b.get('http://google.com')                                                                                                                                   
+    q = b.find_element_by_name('q')                                                                                                                              
+    q.send_keys('selenium')                                                                                                                                      
+    q.submit()  
+    
+def main():
+    traverseInternet('http://www.aljazeera.com/news/default.html')
+    #mtl_blog2("http://www.wired.com/") 
+    #getFeatures("http://techcrunch.com/2015/09/26/augmented-reality-has-an-image-problem/")
+    #urlliby('http://techcrunch.com/2015/09/26/augmented-reality-has-an-image-problem/')
+    #sele()
 main()
